@@ -1,0 +1,172 @@
+/**
+ * Date: 13-November-2018
+ * 
+ * Team 5: SS DUKE
+ * 	Mackenzie Ennis
+ * 	Jake Fultz
+ * 	Kevin Kulda
+ * 	Brandon Lyu
+ * 	Bradley McCaw
+ * 
+ * Assignment: Lab 4
+ * Due Date: 15-Nov-2018
+ * 
+ * Professor: Dr. Carlson
+ * Course: MIS 4320-01 (Java Development)
+ * 
+ * Note: our piratey font is Old English Text MT. This should be standard
+ *       installed on your machine.
+ * 
+ */
+
+//Import statements.
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.text.NumberFormat;
+import java.util.Locale;
+import java.util.Random;
+
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+
+
+public class Dice_Game extends JFrame implements ActionListener{
+	
+    JPanel p = new JPanel(); //Create window
+    
+    Font font = new Font("Old English Text MT", Font.BOLD,18); //Create global Piratey font variable
+
+    JButton play = new JButton("Play"); //Create Button to initiate game.
+
+	Random rand = new Random(); //Create global random number variable.
+
+	//Define and initialize six variables for program.
+    int d1 = 0, d2 = 0, score = 0, doubles = 1, counter = 0, inc = 0;
+    
+    //Implement a JList to dispaly game results
+	DefaultListModel displayRolls = new DefaultListModel();
+	JList rolls = new JList(displayRolls);
+	JScrollPane jsp= new JScrollPane(rolls);
+    
+	NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.US);
+
+	int runningTotal = 0;	//Store the running total of all games.
+	
+	String s;
+	
+
+	public static void main(String[] args) {
+		Dice_Game app = new Dice_Game();	//Create a class object.
+		File TaDa = new File ("C:\\Users\\macke\\eclipse-workspace\\Labs\\src\\Ta Da-SoundBible.com-1884170640.wav");
+		PlaySound(TaDa);
+		app.setSize(535, 700);
+		app.setDefaultCloseOperation(EXIT_ON_CLOSE);
+		app.setTitle("Dice_Game");
+		app.setVisible(true);
+	}
+	static void PlaySound (File sound) 
+	{
+		try{
+			Clip clip = AudioSystem.getClip();
+			clip.open(AudioSystem.getAudioInputStream(sound));
+			clip.start();
+			
+			//Thread.sleep(clip.getMicrosecondLength()/1000);
+			
+	}catch(Exception e)
+		{
+		}
+		}
+	
+	//Class Constructor
+	Dice_Game(){
+		p.setLayout(null);
+		
+		jsp.setBounds(10, 10, 500, 600);
+		p.add(jsp);
+		
+		play.addActionListener(this);
+		play.setFont(font);
+		rolls.setFont(font);
+		p.setBackground(Color.GREEN);
+		play.setBounds(10, 620, 500, 30);
+		p.add(play);
+		add(p);
+	}
+	
+	//Action Listener Function
+	public void actionPerformed(ActionEvent arg0) {
+		
+		//Display all numbers with correct formatting and precision.
+		BigDecimal rT = new BigDecimal("0", MathContext.DECIMAL64);
+		rT = rT.setScale(0, BigDecimal.ROUND_HALF_EVEN);
+		
+		//Remove all elements to replay the game.
+		displayRolls.removeAllElements();
+
+		for(int i = 1; i <= 100; i++) {
+			//Play the Double Trouble game when the button is clicked.
+			while(score < 10000 && score > -10000) {
+				//Generate two random numbers from 1 - 6
+				d1 = rand.nextInt(6) + 1;
+				d2 = rand.nextInt(6) + 1;
+				//If the numbers are not doubles
+				if(d1 != d2) {
+					inc = (int) Math.pow(d1+d2, 2);
+					score -= inc;
+					doubles = 1;
+				}
+				//If the numbers are doubles
+				else if(d1 == d2) {
+					doubles++;
+					inc = (int) Math.pow(d1+d2, doubles);
+					score += inc;
+				}
+				
+				//Track number of rolls in game
+				counter++;
+			
+				}
+			
+				//Track running total of all games.
+				runningTotal += score;
+				s = "" + score;
+				rT = rT.add(new BigDecimal(s, MathContext.DECIMAL64));
+
+				//If you won the game
+				if(score > 0) {
+					play.setText("Press to Replay");
+					inc = 0;					
+					displayRolls.addElement("" + i + "       rolls: " + counter + "      " +
+												"You won " + score + "        " + rT);
+
+				}
+				//If you lost the game.
+				else {
+					play.setText("Press to Replay");
+					inc = 0;
+					displayRolls.addElement("" + i + "       rolls: " + counter + "      " +
+												"You lost " + score + "        " + rT);
+				}
+				//reset roll counter.
+				counter = 0;
+				//reset score counter
+				score = 0;
+				doubles = 1;
+			
+			} // End of 100 for loop.
+			
+		} //End of action listener.
+}
+
